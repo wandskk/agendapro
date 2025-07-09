@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
+import protectedRoutes from "./routes/protected.routes";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/protected", protectedRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Agenda PRO");
