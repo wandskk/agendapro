@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { errorHandler } from "./middlewares/error.middleware";
 import router from "./routes";
 import cookieParser from 'cookie-parser';
+import corsMiddleware from './middlewares/cors.middleware';
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3333;
 
 // Middlewares
-app.use(cors());
+app.use(corsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
 

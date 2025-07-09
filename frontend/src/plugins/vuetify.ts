@@ -1,17 +1,12 @@
-import "vuetify/styles/main.css";
-import { createVuetify } from "vuetify";
-import { aliases, mdi } from "vuetify/iconsets/mdi";
-import "@mdi/font/css/materialdesignicons.css";
+import { createVuetify } from 'vuetify';
+import { aliases, mdi } from 'vuetify/iconsets/mdi';
+import '@mdi/font/css/materialdesignicons.css';
 
 export const vuetify = createVuetify({
-  theme: {
-    defaultTheme: "light",
-  },
+  theme: { defaultTheme: 'light' },
   icons: {
-    defaultSet: "mdi",
+    defaultSet: 'mdi',
     aliases,
-    sets: {
-      mdi,
-    },
+    sets: { mdi },
   },
 });
