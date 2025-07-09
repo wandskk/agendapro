@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import {
   getAppointments,
   getProfessionalAppointments,
@@ -11,7 +11,7 @@ import {
   appointmentUpdateSchema
 } from '../validations/appointment.schema';
 
-export const listAppointments = async (req: Request, res: Response) => {
+export const listAppointments = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.userId;
     const { start, end } = req.query;
@@ -23,16 +23,16 @@ export const listAppointments = async (req: Request, res: Response) => {
     );
 
     res.json(appointments);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const listProfessionalAppointments = async (req: Request, res: Response) => {
+export const listProfessionalAppointments = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     if (user.role !== 'PROFESSIONAL') {
-      return res.status(403).json({ error: 'Access denied: Only professionals can access this route.' });
+      throw { status: 403, message: 'Access denied: Only professionals can access this route.' };
     }
 
     const { start, end } = req.query;
@@ -44,41 +44,41 @@ export const listProfessionalAppointments = async (req: Request, res: Response) 
     );
 
     res.json(appointments);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const addAppointment = async (req: Request, res: Response) => {
+export const addAppointment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.userId;
     const data = appointmentCreateSchema.parse(req.body);
     const newAppointment = await createAppointment(userId, data.professionalId, new Date(data.date), data.notes);
     res.status(201).json(newAppointment);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const editAppointment = async (req: Request, res: Response) => {
+export const editAppointment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.userId;
     const { id } = req.params;
     const data = appointmentUpdateSchema.parse(req.body);
     const updated = await updateAppointment(id, userId, new Date(data.date), data.notes);
     res.json(updated);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const removeAppointment = async (req: Request, res: Response) => {
+export const removeAppointment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.userId;
     const { id } = req.params;
     const deleted = await deleteAppointment(id, userId);
     res.json(deleted);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
