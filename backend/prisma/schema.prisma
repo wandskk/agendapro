@@ -6,3 +6,29 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         Role
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[] @relation("PatientAppointments")
+}
+
+model Appointment {
+  id             String   @id @default(uuid())
+  date           DateTime
+  notes          String?
+  patientId      String
+  professionalId String
+  patient        User     @relation("PatientAppointments", fields: [patientId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+enum Role {
+  PATIENT
+  PROFESSIONAL
+}
