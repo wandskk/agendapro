@@ -10,11 +10,28 @@ export const useAuthStore = defineStore("auth", {
       role: string;
     },
   }),
+
   actions: {
     async login(email: string, password: string) {
       const res = await api.post("/auth/login", { email, password });
-      console.log(res.data);
       this.user = res.data.user;
+      if (res.data.accessToken) {
+        localStorage.setItem("accessToken", res.data.accessToken);
+      }
+    },
+
+    logout() {
+      this.user = null;
+      localStorage.removeItem("accessToken");
+    },
+
+    async fetchMe() {
+      try {
+        const res = await api.get("/users/me");
+        this.user = res.data;
+      } catch (error) {
+        this.user = null;
+      }
     },
   },
 });

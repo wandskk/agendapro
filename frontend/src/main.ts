@@ -3,12 +3,15 @@ import App from './App.vue';
 import { vuetify } from './plugins/vuetify';
 import { createPinia } from 'pinia';
 import { router } from './router';
-import 'vuetify/styles/main.css';
+import { useAuthStore } from './stores/auth';
 
 const app = createApp(App);
-
-app.use(vuetify);
+const pinia = createPinia();
+app.use(pinia);
 app.use(router);
-app.use(createPinia());
+app.use(vuetify);
+
+const auth = useAuthStore(pinia);
+await auth.fetchMe();
 
 app.mount('#app');
