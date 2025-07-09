@@ -6,6 +6,10 @@ import {
   deleteAppointment,
   getProfessionalAppointments
 } from '../services/appointment.service';
+import {
+  appointmentCreateSchema,
+  appointmentUpdateSchema
+} from '../validations/appointment.schema';
 
 export const listAppointments = async (req: Request, res: Response) => {
   try {
@@ -34,19 +38,8 @@ export const listProfessionalAppointments = async (req: Request, res: Response) 
 export const addAppointment = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const { professionalId, date, notes } = req.body;
-
-    if (!professionalId || !date) {
-      return res.status(400).json({ error: 'professionalId and date are required' });
-    }
-
-    const newAppointment = await createAppointment(
-      userId,
-      professionalId,
-      new Date(date),
-      notes
-    );
-
+    const data = appointmentCreateSchema.parse(req.body);
+    const newAppointment = await createAppointment(userId, data.professionalId, new Date(data.date), data.notes);
     res.status(201).json(newAppointment);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -56,10 +49,9 @@ export const addAppointment = async (req: Request, res: Response) => {
 export const editAppointment = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const { date, notes } = req.body;
     const { id } = req.params;
-
-    const updated = await updateAppointment(id, userId, new Date(date), notes);
+    const data = appointmentUpdateSchema.parse(req.body);
+    const updated = await updateAppointment(id, userId, new Date(data.date), data.notes);
     res.json(updated);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -70,7 +62,6 @@ export const removeAppointment = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
     const { id } = req.params;
-
     const deleted = await deleteAppointment(id, userId);
     res.json(deleted);
   } catch (error: any) {
