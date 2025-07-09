@@ -2,10 +2,52 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const getAppointments = async (userId: string) => {
+export const getAppointments = async (
+  userId: string,
+  start?: string,
+  end?: string
+) => {
+  const where: any = { patientId: userId };
+
+  if (start && end) {
+    where.date = {
+      gte: new Date(start),
+      lte: new Date(end)
+    };
+  }
+
   return await prisma.appointment.findMany({
-    where: { patientId: userId },
+    where,
     orderBy: { date: 'asc' }
+  });
+};
+
+export const getProfessionalAppointments = async (
+  professionalId: string,
+  start?: string,
+  end?: string
+) => {
+  const where: any = { professionalId };
+
+  if (start && end) {
+    where.date = {
+      gte: new Date(start),
+      lte: new Date(end)
+    };
+  }
+
+  return await prisma.appointment.findMany({
+    where,
+    orderBy: { date: 'asc' },
+    include: {
+      patient: {
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      }
+    }
   });
 };
 
@@ -86,21 +128,5 @@ export const deleteAppointment = async (id: string, userId: string) => {
 
   return await prisma.appointment.delete({
     where: { id },
-  });
-};
-
-export const getProfessionalAppointments = async (professionalId: string) => {
-  return await prisma.appointment.findMany({
-    where: { professionalId },
-    orderBy: { date: 'asc' },
-    include: {
-      patient: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
   });
 };

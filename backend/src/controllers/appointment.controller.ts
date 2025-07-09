@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import {
   getAppointments,
+  getProfessionalAppointments,
   createAppointment,
   updateAppointment,
-  deleteAppointment,
-  getProfessionalAppointments
+  deleteAppointment
 } from '../services/appointment.service';
 import {
   appointmentCreateSchema,
@@ -14,7 +14,14 @@ import {
 export const listAppointments = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const appointments = await getAppointments(userId);
+    const { start, end } = req.query;
+
+    const appointments = await getAppointments(
+      userId,
+      start?.toString(),
+      end?.toString()
+    );
+
     res.json(appointments);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -28,7 +35,14 @@ export const listProfessionalAppointments = async (req: Request, res: Response) 
       return res.status(403).json({ error: 'Access denied: Only professionals can access this route.' });
     }
 
-    const appointments = await getProfessionalAppointments(user.userId);
+    const { start, end } = req.query;
+
+    const appointments = await getProfessionalAppointments(
+      user.userId,
+      start?.toString(),
+      end?.toString()
+    );
+
     res.json(appointments);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
