@@ -31,6 +31,7 @@ const auth = useAuthStore();
 const handleLogin = async () => {
   try {
     await auth.login(email.value, password.value);
+    await auth.fetchMe();
     router.push("/");
   } catch (error) {
     alert("Email ou senha inválidos");
