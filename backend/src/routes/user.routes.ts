@@ -6,5 +6,6 @@ const router = Router();
 
 router.get("/professionals", userController.getProfessionals);
 router.get("/me", authenticateToken, userController.getMe);
+router.get('/', userController.listUsers);
 
 export default router;
