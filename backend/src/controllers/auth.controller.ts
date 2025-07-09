@@ -5,6 +5,7 @@ import { wrap } from "../utils/wrap";
 import {
   generateAccessToken,
   generateRefreshToken,
+  revokeRefreshToken,
   verifyRefreshToken,
 } from "../services/token.service";
 
@@ -38,6 +39,22 @@ const login = async (req: Request, res: Response) => {
     .json({ accessToken });
 };
 
+const logout = async (req: Request, res: Response) => {
+  const token = req.cookies?.refreshToken;
+
+  if (token) {
+    await revokeRefreshToken(token);
+  }
+
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+
+  res.status(200).json({ message: 'Logged out successfully' });
+};
+
 const refresh = async (req: Request, res: Response) => {
   const token = req.cookies?.refreshToken;
 
@@ -54,5 +71,6 @@ const refresh = async (req: Request, res: Response) => {
 export default {
   register: wrap(register),
   login: wrap(login),
+  logout: wrap(logout),
   refresh: wrap(refresh),
 };
