@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export const getAppointments = async (userId: string) => {
   return await prisma.appointment.findMany({
     where: { patientId: userId },
-    orderBy: { date: "asc" },
+    orderBy: { date: 'asc' }
   });
 };
 
@@ -15,14 +15,18 @@ export const createAppointment = async (
   date: Date,
   notes?: string
 ) => {
-  const conflict = await prisma.appointment.findFirst({
+  const hasConflict = await prisma.appointment.findFirst({
     where: {
       professionalId,
-      date,
+      date: {
+        equals: date,
+      },
     },
   });
 
-  if (conflict) throw new Error("This time slot is already taken.");
+  if (hasConflict) {
+    throw new Error('This time slot is already booked for this professional.');
+  }
 
   return await prisma.appointment.create({
     data: {
@@ -45,7 +49,21 @@ export const updateAppointment = async (
   });
 
   if (!appointment || appointment.patientId !== userId) {
-    throw new Error("Appointment not found or access denied.");
+    throw new Error('Appointment not found or access denied.');
+  }
+
+  const hasConflict = await prisma.appointment.findFirst({
+    where: {
+      id: { not: id },
+      professionalId: appointment.professionalId,
+      date: {
+        equals: date,
+      },
+    },
+  });
+
+  if (hasConflict) {
+    throw new Error('This time slot is already booked for this professional.');
   }
 
   return await prisma.appointment.update({
@@ -63,7 +81,7 @@ export const deleteAppointment = async (id: string, userId: string) => {
   });
 
   if (!appointment || appointment.patientId !== userId) {
-    throw new Error("Appointment not found or access denied.");
+    throw new Error('Appointment not found or access denied.');
   }
 
   return await prisma.appointment.delete({
