@@ -52,7 +52,7 @@ export const updateAppointment = async (
     throw new Error('Appointment not found or access denied.');
   }
 
-  const hasConflict = await prisma.appointment.findFirst({
+  const conflict = await prisma.appointment.findFirst({
     where: {
       id: { not: id },
       professionalId: appointment.professionalId,
@@ -62,7 +62,7 @@ export const updateAppointment = async (
     },
   });
 
-  if (hasConflict) {
+  if (conflict) {
     throw new Error('This time slot is already booked for this professional.');
   }
 
@@ -86,5 +86,21 @@ export const deleteAppointment = async (id: string, userId: string) => {
 
   return await prisma.appointment.delete({
     where: { id },
+  });
+};
+
+export const getProfessionalAppointments = async (professionalId: string) => {
+  return await prisma.appointment.findMany({
+    where: { professionalId },
+    orderBy: { date: 'asc' },
+    include: {
+      patient: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
   });
 };

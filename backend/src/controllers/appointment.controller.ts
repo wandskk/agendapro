@@ -4,12 +4,27 @@ import {
   createAppointment,
   updateAppointment,
   deleteAppointment,
+  getProfessionalAppointments
 } from '../services/appointment.service';
 
 export const listAppointments = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
     const appointments = await getAppointments(userId);
+    res.json(appointments);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const listProfessionalAppointments = async (req: Request, res: Response) => {
+  try {
+    const user = req.user!;
+    if (user.role !== 'PROFESSIONAL') {
+      return res.status(403).json({ error: 'Access denied: Only professionals can access this route.' });
+    }
+
+    const appointments = await getProfessionalAppointments(user.userId);
     res.json(appointments);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
