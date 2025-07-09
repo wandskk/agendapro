@@ -2,13 +2,11 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Função auxiliar para converter HH:MM para minutos desde meia-noite
 function timeStringToMinutes(time: string): number {
   const [hour, min] = time.split(":").map(Number);
   return hour * 60 + min;
 }
 
-// Função auxiliar para criar um Date UTC a partir de data e minutos desde meia-noite
 function dateWithMinutes(date: string, minutes: number): Date {
   const d = new Date(`${date}T00:00:00Z`);
   d.setUTCMinutes(minutes);
@@ -18,7 +16,7 @@ function dateWithMinutes(date: string, minutes: number): Date {
 export const getAvailableTimes = async (
   professionalId: string,
   date: string,
-  intervalMinutes: number = 60 // Permite configurar o intervalo, padrão 60min
+  intervalMinutes: number = 60
 ) => {
   const targetDate = new Date(`${date}T00:00:00Z`);
   const dayOfWeek = targetDate.getUTCDay();
@@ -38,7 +36,6 @@ export const getAvailableTimes = async (
     return [];
   }
 
-  // Buscar apenas os horários já agendados
   const appointments = await prisma.appointment.findMany({
     where: {
       professionalId,
@@ -50,7 +47,6 @@ export const getAvailableTimes = async (
     select: { date: true },
   });
 
-  // Marcar horários ocupados em minutos desde meia-noite
   const takenMinutes = new Set(
     appointments.map((a) => {
       const d = new Date(a.date);
