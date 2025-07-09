@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import {
   getAppointments,
   getProfessionalAppointments,
@@ -10,75 +10,64 @@ import {
   appointmentCreateSchema,
   appointmentUpdateSchema
 } from '../validations/appointment.schema';
+import { wrap } from '../utils/wrap';
 
-export const listAppointments = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.user!.userId;
-    const { start, end } = req.query;
+const listAppointments = async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const { start, end } = req.query;
 
-    const appointments = await getAppointments(
-      userId,
-      start?.toString(),
-      end?.toString()
-    );
+  const appointments = await getAppointments(
+    userId,
+    start?.toString(),
+    end?.toString()
+  );
 
-    res.json(appointments);
-  } catch (error) {
-    next(error);
-  }
+  res.json(appointments);
 };
 
-export const listProfessionalAppointments = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user!;
-    if (user.role !== 'PROFESSIONAL') {
-      throw { status: 403, message: 'Access denied: Only professionals can access this route.' };
-    }
-
-    const { start, end } = req.query;
-
-    const appointments = await getProfessionalAppointments(
-      user.userId,
-      start?.toString(),
-      end?.toString()
-    );
-
-    res.json(appointments);
-  } catch (error) {
-    next(error);
+const listProfessionalAppointments = async (req: Request, res: Response) => {
+  const user = req.user!;
+  if (user.role !== 'PROFESSIONAL') {
+    throw { status: 403, message: 'Access denied: Only professionals can access this route.' };
   }
+
+  const { start, end } = req.query;
+
+  const appointments = await getProfessionalAppointments(
+    user.userId,
+    start?.toString(),
+    end?.toString()
+  );
+
+  res.json(appointments);
 };
 
-export const addAppointment = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.user!.userId;
-    const data = appointmentCreateSchema.parse(req.body);
-    const newAppointment = await createAppointment(userId, data.professionalId, new Date(data.date), data.notes);
-    res.status(201).json(newAppointment);
-  } catch (error) {
-    next(error);
-  }
+const addAppointment = async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const data = appointmentCreateSchema.parse(req.body);
+  const newAppointment = await createAppointment(userId, data.professionalId, new Date(data.date), data.notes);
+  res.status(201).json(newAppointment);
 };
 
-export const editAppointment = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.user!.userId;
-    const { id } = req.params;
-    const data = appointmentUpdateSchema.parse(req.body);
-    const updated = await updateAppointment(id, userId, new Date(data.date), data.notes);
-    res.json(updated);
-  } catch (error) {
-    next(error);
-  }
+const editAppointment = async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const { id } = req.params;
+  const data = appointmentUpdateSchema.parse(req.body);
+  const updated = await updateAppointment(id, userId, new Date(data.date), data.notes);
+  res.json(updated);
 };
 
-export const removeAppointment = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.user!.userId;
-    const { id } = req.params;
-    const deleted = await deleteAppointment(id, userId);
-    res.json(deleted);
-  } catch (error) {
-    next(error);
-  }
+const removeAppointment = async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const { id } = req.params;
+  const deleted = await deleteAppointment(id, userId);
+  res.json(deleted);
+};
+
+export default {
+  listAppointments: wrap(listAppointments),
+  listProfessionalAppointments: wrap(listProfessionalAppointments),
+  addAppointment: wrap(addAppointment),
+  editAppointment: wrap(editAppointment),
+  removeAppointment: wrap(removeAppointment)
 };

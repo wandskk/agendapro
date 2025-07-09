@@ -1,11 +1,5 @@
 import { Router } from "express";
-import {
-  listAppointments,
-  listProfessionalAppointments,
-  addAppointment,
-  editAppointment,
-  removeAppointment,
-} from "../controllers/appointment.controller";
+import appointmentController from "../controllers/appointment.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { requireRole } from "../middlewares/role.middleware";
 
@@ -16,11 +10,11 @@ router.use(authenticateToken);
 router.get(
   "/professional",
   requireRole("PROFESSIONAL"),
-  listProfessionalAppointments
+  appointmentController.listProfessionalAppointments
 );
-router.get("/", listAppointments);
-router.post("/", addAppointment);
-router.put("/:id", editAppointment);
-router.delete("/:id", removeAppointment);
+router.get("/", appointmentController.listAppointments);
+router.post("/", appointmentController.addAppointment);
+router.put("/:id", appointmentController.editAppointment);
+router.delete("/:id", appointmentController.removeAppointment);
 
 export default router;

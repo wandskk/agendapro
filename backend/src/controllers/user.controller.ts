@@ -1,20 +1,18 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { listProfessionals } from '../services/user.service';
+import { wrap } from '../utils/wrap';
 
-export const getProfessionals = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const professionals = await listProfessionals();
-    res.json(professionals);
-  } catch (error) {
-    next(error);
-  }
+const getProfessionals = async (req: Request, res: Response) => {
+  const professionals = await listProfessionals();
+  res.json(professionals);
 };
 
-export const getMe = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user!;
-    res.json(user);
-  } catch (error) {
-    next(error);
-  }
+const getMe = async (req: Request, res: Response) => {
+  const user = req.user!;
+  res.json(user);
+};
+
+export default {
+  getProfessionals: wrap(getProfessionals),
+  getMe: wrap(getMe)
 };
