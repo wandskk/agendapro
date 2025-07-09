@@ -1,12 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth.routes";
-import protectedRoutes from "./routes/protected.routes";
-import appointmentRoutes from "./routes/appointment.routes";
-import userRoutes from "./routes/user.routes";
-import publicRoutes from "./routes/public.routes";
 import { errorHandler } from "./middlewares/error.middleware";
+import router from "./routes";
 
 dotenv.config();
 
@@ -18,11 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/protected", protectedRoutes);
-app.use("/api/appointments", appointmentRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/public", publicRoutes);
+app.use("/api", router);
 
 // Error handling
 app.use(errorHandler);
