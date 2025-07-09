@@ -17,6 +17,18 @@ model User {
   updatedAt    DateTime       @updatedAt
   appointments Appointment[]  @relation("PatientAppointments")
   RefreshToken RefreshToken[]
+  schedules    Schedule[]     @relation("UserSchedule")
+}
+
+model Schedule {
+  id             String @id @default(uuid())
+  professionalId String
+  dayOfWeek      Int
+  startTime      String
+  endTime        String
+  professional   User   @relation("UserSchedule", fields: [professionalId], references: [id])
+
+  @@unique([professionalId, dayOfWeek, startTime, endTime])
 }
 
 model Appointment {
